@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?><!--http://www.android4devs.com/2015/01/how-to-make-material-design-sliding-tabs.html-->
+<resources>
+        
+    <color name="ColorPrimary">#e62117</color>
+        
+    <color name="ColorPrimaryDark">#c31c13</color>
+        
+    <color name="ColorPrimaryDarker">#8a140e</color>
+        
+    <color name="tabsScrollColor">#8a140e</color>
+     
+</resources>

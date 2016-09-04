@@ -1,0 +1,22 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+
+        <item name="android:editTextBackground">@drawable/apptheme_edit_text_holo_dark</item>
+        <!--<item name="android:listChoiceIndicatorMultiple">@drawable/apptheme_btn_check_holo_dark</item>-->
+
+    </style>
+
+    <!-- For sticky header list view -->
+    <style name="Theme.MyApp" parent="android:Theme.NoTitleBar">
+        <!--<item name="stickyListHeadersListViewStyle">@style/Widget.MyApp.ListView</item>-->
+    </style>
+
+    <!-- For material calendar-->
+    <style name="CustomDayTextAppearance" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">#bebebe</item>
+    </style>
+
+
+</resources>
