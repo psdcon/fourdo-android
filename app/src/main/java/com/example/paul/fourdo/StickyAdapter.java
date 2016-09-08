@@ -82,37 +82,8 @@ public class StickyAdapter extends BaseAdapter implements StickyListHeadersAdapt
             holder.taskText = (TextView) convertView.findViewById(R.id.taskNameTextView);
             holder.timeLeft = (TextView) convertView.findViewById(R.id.timeLeft);
             holder.timeStamp = (TextView) convertView.findViewById(R.id.timeStamp);
-            // Check box click listener
             holder.checkBox = (CheckBox) convertView.findViewById(R.id.taskCheckBox);
-            final View finalConvertView = convertView;
-            holder.checkBox.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ((MainActivity) context).checkClickListner(finalConvertView, tasks.get(position));
-                }
-            });
-
-            // Calendar or x
             holder.actionButton = (ImageButton) convertView.findViewById(R.id.taskActionButton);
-            holder.actionButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // Check if we are removing the task from view
-                    if (tasks.get(position).done == 1) {
-                        ((MainActivity) context).removeTask(tasks.get(position));
-                    }
-                    // Start the calendar activity which will pass the date selected back to main
-                    else {
-                        Intent myIntent = new Intent((MainActivity) context, CalendarActivity.class);
-                        myIntent.putExtra("databaseId", tasks.get(position).databaseId);
-                        myIntent.putExtra("dateCompleteBy", tasks.get(position).dateCompleteBy);
-                        // Sliding transition
-                        Bundle translateBundle = ActivityOptions.makeCustomAnimation((MainActivity) context,
-                                R.anim.slide_in_left, R.anim.slide_out_left).toBundle();
-                        ((MainActivity) context).startActivityForResult(myIntent, 1, translateBundle);
-                    }
-                }
-            });
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -147,6 +118,46 @@ public class StickyAdapter extends BaseAdapter implements StickyListHeadersAdapt
             else
                 holder.actionButton.setImageResource(R.drawable.perm_group_calendar);
         }
+
+        // Set clicklistener to open subtask menu
+        holder.taskText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent myIntent = new Intent((MainActivity) context, SubtaskActivity.class);
+                myIntent.putExtra("databaseId", tasks.get(position).databaseId);
+                ((MainActivity) context).startActivity(myIntent);
+            }
+        });
+
+        // Check box click listener
+        final View finalConvertView = convertView;
+        holder.checkBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity) context).checkClickListner(finalConvertView, tasks.get(position));
+            }
+        });
+
+        // Calendar or x
+        holder.actionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Check if we are removing the task from view
+                if (tasks.get(position).done == 1) {
+                    ((MainActivity) context).removeTask(tasks.get(position));
+                }
+                // Start the calendar activity which will pass the date selected back to main
+                else {
+                    Intent myIntent = new Intent((MainActivity) context, CalendarActivity.class);
+                    myIntent.putExtra("databaseId", tasks.get(position).databaseId);
+                    myIntent.putExtra("dateCompleteBy", tasks.get(position).dateCompleteBy);
+                    // Sliding transition
+                    Bundle translateBundle = ActivityOptions.makeCustomAnimation((MainActivity) context,
+                            R.anim.slide_in_left, R.anim.slide_out_left).toBundle();
+                    ((MainActivity) context).startActivityForResult(myIntent, 1, translateBundle);
+                }
+            }
+        });
 
         return convertView;
     }

@@ -32,7 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:translationY="-50dip"
+        android:translationY="-40dip"
         tools:context=".MainActivity">
 
         <com.example.paul.fourdo.CustomEditText

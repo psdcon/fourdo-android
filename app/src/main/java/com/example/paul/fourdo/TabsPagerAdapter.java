@@ -25,13 +25,14 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
         Bundle bundle = new Bundle();
         bundle.putInt("tabIndex", index);
 
-        tabs[index] = new Tab();
-        tabs[index].setArguments(bundle);
-
         switch(index){
             case 0:
+                tabs[0] = new Tab();
+                tabs[0].setArguments(bundle);
                 return tabs[0];
             case 1:
+                tabs[1] = new Tab();
+                tabs[1].setArguments(bundle);
                 return tabs[1];
         }
         return null;

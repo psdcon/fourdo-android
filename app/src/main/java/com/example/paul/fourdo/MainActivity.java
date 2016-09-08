@@ -34,20 +34,6 @@ import java.util.TimerTask;
 
 public class MainActivity extends ActionBarActivity {
 
-    /* TODO Fix this crasher. All i was doing is rotating with the new task open
-    09-03 19:13:19.389 19085-19085/com.example.paul.fourdo E/AndroidRuntime: FATAL EXCEPTION: main
-         Process: com.example.paul.fourdo, PID: 19085
-         java.lang.NullPointerException: Attempt to invoke virtual method 'void com.example.paul.fourdo.Tab.updateTabViews()' on a null object reference
-             at com.example.paul.fourdo.MainActivity$3$1.run(MainActivity.java:120)
-             at android.os.Handler.handleCallback(Handler.java:739)
-             at android.os.Handler.dispatchMessage(Handler.java:95)
-             at android.os.Looper.loop(Looper.java:152)
-             at android.app.ActivityThread.main(ActivityThread.java:5507)
-             at java.lang.reflect.Method.invoke(Native Method)
-             at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:726)
-             at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:616)
-    * */
-
     // Data vars
     private TodoListSQLHelper todoListSQLHelper;
     private ArrayList<Task> tasks;
@@ -137,7 +123,7 @@ public class MainActivity extends ActionBarActivity {
                 });
             }
         };
-        timer.schedule(doAsynchronousTask, 5001, 30000); // Update every 30 seconds after a delay of 5001
+        timer.schedule(doAsynchronousTask, 5001, 5000); // Update every 5 seconds after a delay of 5001
 
     }
 
@@ -369,6 +355,9 @@ public class MainActivity extends ActionBarActivity {
 
         if (id == R.id.action_view_tasks) {
             MainActivity.this.startActivity(new Intent(MainActivity.this, ViewTasksActivity.class));
+            return true;
+        }
+        else if (id == R.id.action_settings) {
             return true;
         }
 
