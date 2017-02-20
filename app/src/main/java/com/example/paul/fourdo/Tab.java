@@ -101,9 +101,10 @@ public class Tab extends Fragment {
         tomorrowStartCal.add(Calendar.DATE, 1);
         double tomorrowHoursUntil = TimeUnit.MILLISECONDS.toHours(tomorrowStartCal.getTimeInMillis() - nowSec);
 
-        Calendar mondayCal = (Calendar) todayStartCal.clone();
-        mondayCal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        double mondayDaysUntil = TimeUnit.MILLISECONDS.toDays(mondayCal.getTimeInMillis() - nowSec);
+        Calendar thisWeekEndCal = (Calendar) todayStartCal.clone();
+        thisWeekEndCal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        thisWeekEndCal.add(Calendar.DATE, 1);  // pretending this week ends on the first minute of monday next week
+        double mondayDaysUntil = TimeUnit.MILLISECONDS.toDays(thisWeekEndCal.getTimeInMillis() - nowSec);
 
         Calendar monthEndCal = (Calendar) todayStartCal.clone();
         monthEndCal.set(Calendar.DAY_OF_MONTH, todayStartCal.getActualMaximum(Calendar.DAY_OF_MONTH));
