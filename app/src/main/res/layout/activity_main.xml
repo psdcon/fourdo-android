@@ -17,7 +17,7 @@
         <com.example.paul.fourdo.SlidingTabLayout
             android:id="@+id/tabs"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:background="@color/ColorPrimary" />
 
         <android.support.v4.view.ViewPager
@@ -32,22 +32,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:translationY="-50dip"
+        android:translationY="-60dip"
         tools:context=".MainActivity">
 
         <com.example.paul.fourdo.CustomEditText
             android:id="@+id/textTask"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="60dp"
-            android:layout_marginStart="60dp"
-            android:layout_marginRight="40dp"
-            android:layout_marginEnd="40dp"
+            android:layout_marginLeft="64dp"
+            android:layout_marginStart="64dp"
+            android:layout_marginRight="48dp"
+            android:layout_marginEnd="48dp"
+            android:layout_marginTop="8dp"
             android:layout_weight="1"
             android:hint="@string/newTaskHint"
             android:imeOptions="actionDone"
             android:inputType="textCapSentences"
-            android:singleLine="true" />
+            android:maxLines="1" />
 
     </LinearLayout>
 
@@ -74,6 +75,5 @@
             fab:shadow_color="@color/ColorPrimaryDarker"
             fab:show_animation="@anim/fab_jump_from_down" />
     </RelativeLayout>
-
 
 </android.support.v4.widget.DrawerLayout>

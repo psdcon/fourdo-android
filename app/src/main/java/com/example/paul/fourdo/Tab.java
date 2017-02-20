@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
@@ -36,7 +38,7 @@ public class Tab extends Fragment {
         // Add footer to list so that floating action button doesn't cover bottom tasks
         TextView emptyTextView = new TextView(container.getContext());
         emptyTextView.setHeight(240);
-        stickyList.addFooterView(emptyTextView);
+        stickyList.addFooterView(emptyTextView, null, false);
 
         // Get this Tab's index which is bundled in TabsPagerAdapter; 0 today, 1 someday
         Bundle bundle = getArguments();
@@ -89,44 +91,69 @@ public class Tab extends Fragment {
         Calendar nowCal = Calendar.getInstance();
         long nowSec = nowCal.getTimeInMillis();
 
-        Calendar midnightCal = Calendar.getInstance();
-        midnightCal.set(Calendar.HOUR_OF_DAY, 23);
-        midnightCal.set(Calendar.MINUTE, 59);
-        midnightCal.set(Calendar.SECOND, 59);
-        long tomorrowSecUntil = midnightCal.getTimeInMillis() - nowSec;
-        double tomorrowHoursUntil = tomorrowSecUntil / 3600000.0;
+        Calendar todayStartCal = Calendar.getInstance();
+        todayStartCal.set(Calendar.HOUR_OF_DAY, 0);
+        todayStartCal.set(Calendar.MINUTE, 0);
+        todayStartCal.set(Calendar.SECOND, 0);
+        todayStartCal.set(Calendar.MILLISECOND, 0);
 
-        Calendar mondayCal = Calendar.getInstance();
-        mondayCal.setTime(midnightCal.getTime());
-        mondayCal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-        long mondaySecUntil = mondayCal.getTimeInMillis() - nowSec;
-        double mondayHoursUntil = mondaySecUntil / 3600000.0;
-        double mondayDaysUntil = mondayHoursUntil / 24.0;
+        Calendar tomorrowStartCal = (Calendar) todayStartCal.clone();
+        tomorrowStartCal.add(Calendar.DATE, 1);
+        double tomorrowHoursUntil = TimeUnit.MILLISECONDS.toHours(tomorrowStartCal.getTimeInMillis() - nowSec);
 
-        Calendar nextMonthCal = Calendar.getInstance();
-        nextMonthCal.setTime(midnightCal.getTime());
-        nextMonthCal.set(Calendar.DAY_OF_MONTH, nowCal.getActualMaximum(Calendar.DAY_OF_MONTH));
-        long nextMonthSecUntil = nextMonthCal.getTimeInMillis() - nowSec;
-        double nextMonthHoursUntil = nextMonthSecUntil / 3600000.0;
-        double nextMonthDaysUntil = nextMonthHoursUntil / 24.0;
+        Calendar mondayCal = (Calendar) todayStartCal.clone();
+        mondayCal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        double mondayDaysUntil = TimeUnit.MILLISECONDS.toDays(mondayCal.getTimeInMillis() - nowSec);
+
+        Calendar monthEndCal = (Calendar) todayStartCal.clone();
+        monthEndCal.set(Calendar.DAY_OF_MONTH, todayStartCal.getActualMaximum(Calendar.DAY_OF_MONTH));
+        double monthEndDaysUntil = TimeUnit.MILLISECONDS.toDays(monthEndCal.getTimeInMillis() - nowSec);
+
+        Calendar nextMonthEnd = (Calendar) monthEndCal.clone();
+        nextMonthEnd.add(Calendar.DATE, 1);
+        nextMonthEnd.set(Calendar.DAY_OF_MONTH, nextMonthEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
+        double nextMonthEndDaysUntil = TimeUnit.MILLISECONDS.toDays(nextMonthEnd.getTimeInMillis() - nowSec);
 
         for (int i = 0; i < thisTasks.size(); i++) {
+            /* Two things going on here.
+                If in the today tab, the comparisons are done using hoursUntil
+                If in Someday tab, the comparison is done based on taskDayStart but the times printed are based on hoursUntil
+            */
+
             // Figure out how long till this task's due
-            long taskSecUntil = thisTasks.get(i).dateCompleteBy - nowSec;
-            double taskHoursUntil = taskSecUntil / 3600000.0; // Number of milliseconds in an hour
+            long taskMilliSecUntil = thisTasks.get(i).dateCompleteBy - nowSec;
+            double taskHoursUntil = taskMilliSecUntil / 3600000.0; // Number of milliseconds in an hour
+
+//            For printing
+            int taskPrintTodayHoursUntil = (int) (((taskHoursUntil/24)%1)*24);
+            int taskPrintTodayMinsUntil = (int) ((((taskHoursUntil/24)%1)*24)%1*60);
+            int taskPrintWeeksUntil = (int) ((taskMilliSecUntil/86400000.0) / 7);
+            int taskPrintDaysUntil = (int) (((taskMilliSecUntil/86400000.0)/7)%1*7);
+//            int taskPrintMonthsUntil = (int) ((taskMilliSecUntil/86400000.0) % 30);
+
+            // Create calendar representing task for use in day calculations
+            Calendar taskDayStartCal = Calendar.getInstance();
+            taskDayStartCal.setTimeInMillis(thisTasks.get(i).dateCompleteBy);
+            taskDayStartCal.set(Calendar.HOUR_OF_DAY, 0);
+            taskDayStartCal.set(Calendar.MINUTE, 0);
+            taskDayStartCal.set(Calendar.SECOND, 0);
+            taskDayStartCal.set(Calendar.MILLISECOND, 0);
+
+            long taskMilliSecUntilStarts = taskDayStartCal.getTimeInMillis() - todayStartCal.getTimeInMillis();
+            double taskDaysUntil = taskMilliSecUntilStarts / 86400000.0; // Number of milliseconds in a day
+
+
             if (thisTabIndex == TODAY_TAB) {
                 // If time not set, 'do soon'
                 // If time set in the past, umm...
                 // If time set, group by hour
 
-                // If completeBy date is not set ( ie task was added on this tab
+                // If completeBy date is not set ( ie task was added on this tab )
                 if (thisTasks.get(i).dateCompleteBy == 0) {
                     thisTasks.get(i).headerId = 6; // Anytime today...
                 } else {
                     // Set timeUntil text that appears on list item
-                    thisTasks.get(i).timeUntil = Integer.toString((int) taskHoursUntil) + "h " +
-                            Integer.toString((int) ((taskHoursUntil - (int) taskHoursUntil % 60) * 60)) + "m";
-
+                    thisTasks.get(i).timeUntil = String.format(Locale.ENGLISH, "%dh %dm", taskPrintTodayHoursUntil, taskPrintTodayMinsUntil);
                     if (taskHoursUntil > tomorrowHoursUntil) {
                         // Task has been set to tomorrow, it should be moved to SOMEDAY_TAB
                         ((MainActivity) getActivity()).moveTaskToTab(SOMEDAY_TAB, thisTasks.get(i));
@@ -136,11 +163,11 @@ public class Tab extends Fragment {
                         // Are you doing it?
                         thisTasks.get(i).headerId = 0;
                         if (taskHoursUntil > -1) // If task was due an hour ago countdown only in min
-                            thisTasks.get(i).timeUntil = Integer.toString((int) (taskHoursUntil * 60)) + "m"; // num minutes = hours * minute
+                            thisTasks.get(i).timeUntil = String.format(Locale.ENGLISH, "%dm", taskPrintTodayMinsUntil);
                     } else if (taskHoursUntil < 1) {
                         // Less than an hour
                         thisTasks.get(i).headerId = 1;
-                        thisTasks.get(i).timeUntil = Integer.toString((int) (taskHoursUntil * 60)) + "m"; // num minutes = hours * minute
+                        thisTasks.get(i).timeUntil = String.format(Locale.ENGLISH, "%dm", taskPrintTodayMinsUntil);
                     } else if (taskHoursUntil < 2) {
                         // Less than 2 hours
                         thisTasks.get(i).headerId = 2;
@@ -161,49 +188,49 @@ public class Tab extends Fragment {
                 if (thisTasks.get(i).dateCompleteBy == 0) {
                     thisTasks.get(i).headerId = 7; // Someday
                 } else {
-                    double tomorrowDaysUntil = tomorrowHoursUntil / 24.0;
-                    double taskDaysUntil = taskSecUntil / 86400000.0; // Num milliseconds in a day
+                    // Days until a task, where task-day is 00:00:00 the day task is due minus 00:00:00 of day
+//                    taskDaysUntil = tas
 
-                    if (taskHoursUntil < tomorrowHoursUntil) {
+//                    If the number of hours till the task is due is less than the number of hours from now until tomorrow
+                    if (taskDaysUntil < 1) {
                         // Need to move to Today tab
                         ((MainActivity) getActivity()).moveTaskToTab(TODAY_TAB, thisTasks.get(i));
                         removeItem(thisTasks.get(i));
                         break; // from loop. Sorting happens again
-                    } else if (taskHoursUntil < 24 + tomorrowHoursUntil) {
+                    } else if (taskDaysUntil < 2) {
                         // Tomorrow
                         thisTasks.get(i).headerId = 0;
-                        thisTasks.get(i).timeUntil = Integer.toString((int) taskHoursUntil) + "h";
-                    } else if (taskDaysUntil < 2 + tomorrowDaysUntil) {
+                        thisTasks.get(i).timeUntil = String.format(Locale.ENGLISH, "%dh %dm", (int)(taskHoursUntil), taskPrintTodayMinsUntil);
+//                        thisTasks.get(i).timeUntil = String.format(Locale.ENGLISH, "%dh %dm", taskPrintTodayHoursUntil, taskPrintTodayMinsUntil);
+                    } else if (taskDaysUntil < 3) {
                         // In 2 days
                         thisTasks.get(i).headerId = 1;
-                        thisTasks.get(i).timeUntil = Integer.toString((int) taskDaysUntil) + "d " +
-                            Integer.toString((int)taskHoursUntil%24) + "h";
+                        thisTasks.get(i).timeUntil = String.format(Locale.ENGLISH, "%dd %dh", taskPrintDaysUntil, taskPrintTodayHoursUntil);
                     } else if (taskDaysUntil < mondayDaysUntil) {
-                        // This weeek
+                        // This week
                         thisTasks.get(i).headerId = 2;
-                        thisTasks.get(i).timeUntil = Integer.toString((int) taskDaysUntil) + "d";
+                        thisTasks.get(i).timeUntil = String.format(Locale.ENGLISH, "%dd %dh", taskPrintDaysUntil, taskPrintTodayHoursUntil);
                     } else if (taskDaysUntil < 7 + mondayDaysUntil) {
                         // Next week
                         thisTasks.get(i).headerId = 3;
-                        thisTasks.get(i).timeUntil = Integer.toString((int) taskDaysUntil) + "d";
-                    } else if (taskDaysUntil < nextMonthDaysUntil) {
+                        thisTasks.get(i).timeUntil = String.format(Locale.ENGLISH, "%dd %dh", taskPrintDaysUntil, taskPrintTodayHoursUntil);
+                    } else if (taskDaysUntil < monthEndDaysUntil) {
                         // This month
                         thisTasks.get(i).headerId = 4;
-                        thisTasks.get(i).timeUntil = Integer.toString((int) (taskDaysUntil / 7)) + "w " +
-                                Integer.toString((int) ((int) taskDaysUntil % 7)) + "d";
-                    } else if (taskDaysUntil < 30 + nextMonthDaysUntil) {
+                        thisTasks.get(i).timeUntil = String.format(Locale.ENGLISH, "%dw %dd %dh", taskPrintWeeksUntil, taskPrintDaysUntil, taskPrintTodayHoursUntil);
+                    } else if (taskDaysUntil < nextMonthEndDaysUntil) {
                         // Next month
                         thisTasks.get(i).headerId = 5;
-                        thisTasks.get(i).timeUntil = Integer.toString((int) (taskDaysUntil / 7)) + "w " +
-                                Integer.toString((int) ((int) taskDaysUntil % 7)) + "d";
+                        thisTasks.get(i).timeUntil = String.format(Locale.ENGLISH, "%dw %dd %dh", taskPrintWeeksUntil, taskPrintDaysUntil, taskPrintTodayHoursUntil);
                     } else {
                         // Beyond worrying
                         thisTasks.get(i).headerId = 6;
-                        if (taskDaysUntil < 60)
-                            thisTasks.get(i).timeUntil = Integer.toString((int) (taskDaysUntil / 7)) + "w";
-                        else
-                            thisTasks.get(i).timeUntil = Integer.toString((int) (taskDaysUntil / 30)) + "m";
+//                        if (taskDaysUntil < 60)
+                        thisTasks.get(i).timeUntil = String.format(Locale.ENGLISH, "%dw %dd %dh", taskPrintWeeksUntil, taskPrintDaysUntil, taskPrintTodayHoursUntil);
 
+//                        else
+//                            thisTasks.get(i).timeUntil = Integer.toString((int) (taskDaysUntil / 30)) + "m " +
+//                                    Integer.toString((int) (taskDaysUntil / 7)) + "w";
                     }
                 }
             }

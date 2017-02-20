@@ -194,7 +194,7 @@ public class MainActivity extends ActionBarActivity {
     // Redisplay floating action button, hide textView. Keyboard already hidden
     public void disableAddTask(){
         // Slide down the edit text
-        action_bar_inputs.animate().setDuration(300).translationY(-textTask.getHeight()).withEndAction(new Runnable() {
+        action_bar_inputs.animate().setDuration(300).translationY(-140).withEndAction(new Runnable() {
             @Override
             public void run() {
                 // Slide the floating action button into view

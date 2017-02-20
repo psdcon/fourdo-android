@@ -33,7 +33,7 @@ public class StickyAdapter extends BaseAdapter implements StickyListHeadersAdapt
     private Context context;
 
     private static final String[] todayHeaderTitles = {"Are you doing it?", "Less than an hour", "Less than 2 hours", "Less than 4 hours", "Less than 6 hours", "More than 6 hours", "Any ol' time today, mate"};
-    private static final String[] somedayHeaderTitles = {"Tomorrow", "In 2 days", "This week", "Next week", "This month", "Next month", "Future you's problem, you relax", "Someday"};
+    private static final String[] somedayHeaderTitles = {"Tomorrow", "In 2 days", "This week", "Next week", "This month", "Next month", "Future you's problem. You relax.", "Someday"};
     private String[] headerTitles;
     SimpleDateFormat dayTimeText = new SimpleDateFormat("E H:mm");
 
